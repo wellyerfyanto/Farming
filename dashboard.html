@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 Bot Farm Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container-fluid py-4">
+        <div class="dashboard-container">
+            <!-- Header -->
+            <div class="header-section">
+                <h1 class="animate__animated animate__fadeInDown">
+                    <i class="fas fa-robot me-3"></i>Bot Farm Manager
+                </h1>
+                <p class="lead animate__animated animate__fadeInUp">Multi-Device Automation System</p>
+            </div>
+
+            <!-- Control Panel -->
+            <div class="container-fluid py-4">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-cogs me-2"></i>Farm Controls
+                                </h5>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <button class="btn btn-primary w-100" onclick="startFarm()">
+                                            <i class="fas fa-play me-2"></i>Start Farm
+                                        </button>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button class="btn btn-danger w-100" onclick="stopFarm()">
+                                            <i class="fas fa-stop me-2"></i>Stop Farm
+                                        </button>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button class="btn btn-info w-100" onclick="updateStats()">
+                                            <i class="fas fa-sync-alt me-2"></i>Refresh Stats
+                                        </button>
+                                    </div>
+                                    <div class="col-md-4" id="forceStopBtn">
+                                        <button class="btn btn-warning w-100" onclick="forceStopFarm()">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>Force Stop
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scenario Selection -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-play-circle me-2"></i>Scenario Selection
+                                </h5>
+                                
+                                <!-- Scenario Type Selection -->
+                                <div class="row mb-4">
+                                    <div class="col-md-12">
+                                        <label class="form-label">Pilih Scenario:</label>
+                                        <select class="form-select" id="scenarioType" onchange="showScenarioConfig()">
+                                            <option value="">-- Pilih Scenario --</option>
+                                            <option value="youtube">YouTube View Farming</option>
+                                            <option value="traffic">Website Traffic Generation</option>
+                                            <option value="search">Search Engine Simulation</option>
+                                            <option value="custom">Custom Scenario</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- YouTube Scenario Config -->
+                                <div id="youtubeConfig" class="scenario-config" style="display: none;">
+                                    <h6><i class="fab fa-youtube me-2 text-danger"></i>YouTube View Farming</h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Video URLs (satu per baris):</label>
+                                            <textarea class="form-control" id="youtubeUrls" rows="3" 
+                                                      placeholder="https://www.youtube.com/watch?v=abc123&#10;https://www.youtube.com/watch?v=def456"></textarea>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Min Watch Time (detik):</label>
+                                            <input type="number" class="form-control" id="youtubeMinTime" value="60" min="30">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Max Watch Time (detik):</label>
+                                            <input type="number" class="form-control" id="youtubeMaxTime" value="180" min="60">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">
+                                                <input type="checkbox" id="youtubeLike" class="form-check-input me-2">
+                                                Auto Like Videos
+                                            </label>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">
+                                                <input type="checkbox" id="youtubeSubscribe" class="form-check-input me-2">
+                                                Auto Subscribe Channel
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Traffic Scenario Config -->
+                                <div id="trafficConfig" class="scenario-config" style="display: none;">
+                                    <h6><i class="fas fa-globe me-2 text-primary"></i>Website Traffic Generation</h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-8">
+                                            <label class="form-label">Target URLs (satu per baris):</label>
+                                            <textarea class="form-control" id="trafficUrls" rows="3"
+                                                      placeholder="https://example.com&#10;https://example.com/blog&#10;https://example.com/products"></textarea>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Visit Duration (detik):</label>
+                                            <input type="number" class="form-control" id="trafficDuration" value="120" min="30">
+                                            <label class="form-label mt-2">Page Views per Session:</label>
+                                            <input type="number" class="form-control" id="trafficPages" value="5" min="1" max="20">
+                                        </div>
+                                        <div class="col-md-12">
+                                            <label class="form-label">
+                                                <input type="checkbox" id="trafficRandomClick" class="form-check-input me-2" checked>
+                                                Random Click Links
+                                            </label>
+                                            <label class="form-label ms-3">
+                                                <input type="checkbox" id="trafficScroll" class="form-check-input me-2" checked>
+                                                Random Scrolling
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Search Scenario Config -->
+                                <div id="searchConfig" class="scenario-config" style="display: none;">
+                                    <h6><i class="fas fa-search me-2 text-info"></i>Search Engine Simulation</h6>
+                                    <div class="row g-3">
+                                        <!-- Mode Keyword -->
+                                        <div class="col-md-4">
+                                            <label class="form-label">Keyword Mode:</label>
+                                            <select class="form-select" id="searchMode" onchange="toggleKeywordMode()">
+                                                <option value="manual">Manual Input</option>
+                                                <option value="auto">Auto-Generated</option>
+                                                <option value="file">From File</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <!-- Manual Keywords -->
+                                        <div class="col-md-8" id="manualKeywordsSection">
+                                            <label class="form-label">Keywords (satu per baris):</label>
+                                            <textarea class="form-control" id="searchKeywords" rows="3"
+                                                      placeholder="technology news&#10;programming tutorial&#10;AI developments"></textarea>
+                                        </div>
+                                        
+                                        <!-- Auto Keywords Configuration -->
+                                        <div class="col-md-8" id="autoKeywordsSection" style="display: none;">
+                                            <label class="form-label">Auto Keywords Configuration:</label>
+                                            <div class="row g-2">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Category:</label>
+                                                    <select class="form-select" id="keywordCategory">
+                                                        <option value="technology">Technology</option>
+                                                        <option value="news">News</option>
+                                                        <option value="sports">Sports</option>
+                                                        <option value="entertainment">Entertainment</option>
+                                                        <option value="education">Education</option>
+                                                        <option value="business">Business</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Keyword Count:</label>
+                                                    <input type="number" class="form-control" id="keywordCount" value="10" min="5" max="50">
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <button class="btn btn-sm btn-info mt-2" onclick="loadAutoKeywords()">
+                                                        <i class="fas fa-random me-1"></i> Generate Keywords
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- File Upload -->
+                                        <div class="col-md-8" id="fileKeywordsSection" style="display: none;">
+                                            <label class="form-label">Upload Keywords File:</label>
+                                            <input type="file" class="form-control" id="keywordsFile" accept=".txt,.csv,.json">
+                                            <small class="text-muted">Format: satu keyword per baris, atau JSON array</small>
+                                        </div>
+                                        
+                                        <!-- Target URL (Optional) -->
+                                        <div class="col-md-12">
+                                            <label class="form-label">Target URLs (optional - untuk klik dari hasil pencarian):</label>
+                                            <textarea class="form-control" id="targetUrls" rows="2"
+                                                      placeholder="https://example.com/blog/post-1&#10;https://example.com/article/ai-trends"></textarea>
+                                            <small class="text-muted">URL yang ingin dibuka dari hasil pencarian (kosongkan untuk random)</small>
+                                        </div>
+                                        
+                                        <!-- Search Engine Selection -->
+                                        <div class="col-md-4">
+                                            <label class="form-label">Search Engine:</label>
+                                            <select class="form-select" id="searchEngine">
+                                                <option value="google">Google</option>
+                                                <option value="bing">Bing</option>
+                                                <option value="both">Google & Bing (alternating)</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <!-- Activity Configuration -->
+                                        <div class="col-md-8">
+                                            <label class="form-label">Activity Settings:</label>
+                                            <div class="row g-2">
+                                                <div class="col-md-4">
+                                                    <label class="form-label">Searches per Device:</label>
+                                                    <input type="number" class="form-control" id="searchCount" value="5" min="1" max="20">
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label">Min Results Click:</label>
+                                                    <input type="number" class="form-control" id="searchMinClick" value="2" min="1" max="10">
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label">Max Results Click:</label>
+                                                    <input type="number" class="form-control" id="searchMaxClick" value="4" min="1" max="10">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Human-like Behavior Settings -->
+                                        <div class="col-md-12">
+                                            <label class="form-label"><i class="fas fa-user me-2"></i>Human Behavior Simulation:</label>
+                                            <div class="row g-3">
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Min Read Time (sec):</label>
+                                                    <input type="number" class="form-control" id="minReadTime" value="30" min="10" max="300">
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Max Read Time (sec):</label>
+                                                    <input type="number" class="form-control" id="maxReadTime" value="90" min="20" max="600">
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Scroll Speed:</label>
+                                                    <select class="form-select" id="scrollSpeed">
+                                                        <option value="slow">Slow Reader</option>
+                                                        <option value="medium" selected>Medium</option>
+                                                        <option value="fast">Fast Reader</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Click Pattern:</label>
+                                                    <select class="form-select" id="clickPattern">
+                                                        <option value="normal">Normal User</option>
+                                                        <option value="explorer">Content Explorer</option>
+                                                        <option value="researcher">Researcher</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Advanced Options -->
+                                        <div class="col-md-12">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="useCtrlF" checked>
+                                                <label class="form-check-label">
+                                                    Use Page Search (Ctrl+F simulation)
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="randomNavigation" checked>
+                                                <label class="form-check-label">
+                                                    Random Internal Navigation
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="returnToHome">
+                                                <label class="form-check-label">
+                                                    Return to Home Menu
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Custom Scenario Config -->
+                                <div id="customConfig" class="scenario-config" style="display: none;">
+                                    <h6><i class="fas fa-cogs me-2 text-warning"></i>Custom Scenario</h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-12">
+                                            <label class="form-label">Custom Task Configuration (JSON):</label>
+                                            <textarea class="form-control" id="customJson" rows="5" placeholder='{
+  "tasks": [
+    {
+      "type": "website_visit",
+      "urls": ["https://example.com"],
+      "duration": 120
+    }
+  ]
+}'></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Scenario Actions -->
+                                <div class="row mt-3">
+                                    <div class="col-md-12">
+                                        <button class="btn btn-success" onclick="saveScenarioConfig()">
+                                            <i class="fas fa-save me-2"></i>Save Scenario Configuration
+                                        </button>
+                                        <button class="btn btn-info ms-2" onclick="loadScenarioPreset()">
+                                            <i class="fas fa-download me-2"></i>Load Preset
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistics -->
+                <div class="row" id="statsSection">
+                    <!-- Stats will be loaded here by JavaScript -->
+                </div>
+
+                <!-- Google Accounts Management -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fab fa-google me-2"></i>Google Accounts
+                                </h5>
+                                <div class="row g-3">
+                                    <div class="col-md-8">
+                                        <textarea class="form-control" id="googleAccounts" rows="4" 
+                                                  placeholder="Format: email:password&#10;account1@gmail.com:password1&#10;account2@gmail.com:password2"></textarea>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button class="btn btn-success w-100 mb-2" onclick="updateGoogleAccounts()">
+                                            <i class="fas fa-save me-2"></i>Update Accounts
+                                        </button>
+                                        <button class="btn btn-warning w-100" onclick="loadSampleAccounts()">
+                                            <i class="fas fa-vial me-2"></i>Load Sample
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Management Section -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-user-shield me-2"></i>Profile Management
+                                </h5>
+                                
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Export Profile:</label>
+                                        <select class="form-select" id="exportDevice">
+                                            <option value="">Select Device</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">&nbsp;</label>
+                                        <button class="btn btn-success w-100" onclick="exportProfile()">
+                                            <i class="fas fa-download me-2"></i>Export Profile
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="row g-3 mt-2">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Import Profile:</label>
+                                        <input type="file" class="form-control" id="importFile" accept=".json">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Device ID:</label>
+                                        <input type="text" class="form-control" id="importDeviceId" placeholder="device_1">
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-12">
+                                        <button class="btn btn-primary w-100" onclick="importProfile()">
+                                            <i class="fas fa-upload me-2"></i>Import Profile
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mt-3">
+                                    <div class="col-12">
+                                        <h6>Active Profiles:</h6>
+                                        <div id="profilesList" class="mt-2">
+                                            <!-- Profiles will be listed here -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Devices Grid -->
+                <div class="row">
+                    <div class="col-12">
+                        <h4 class="mb-3">
+                            <i class="fas fa-tablets me-2"></i>Devices Status
+                        </h4>
+                        <div class="row" id="devicesGrid">
+                            <!-- Devices will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logs -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card stat-card">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-terminal me-2"></i>Live Logs
+                                </h5>
+                                <div class="log-container" id="logContainer">
+                                    <div class="log-entry">>> System initialized. Ready to start bot farm.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

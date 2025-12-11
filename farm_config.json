@@ -1,0 +1,9 @@
+{
+    "max_concurrent_devices": 1,
+    "task_interval_min": 300,
+    "task_interval_max": 600,
+    "rotation_enabled": false,
+    "proxy_rotation": false,
+    "headless": true,
+    "save_session": true
+}
