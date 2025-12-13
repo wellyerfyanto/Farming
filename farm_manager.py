@@ -93,6 +93,7 @@ class BotFarmManager:
         logger.info("Updated Google accounts: %d accounts", len(accounts))
 
     def initialize_devices(self, devices_config):
+        def initialize_devices(self, devices_config):
         """Initialize devices dari configuration"""
         if not self.profile_manager:
             logger.error("Profile manager not initialized")
@@ -111,12 +112,21 @@ class BotFarmManager:
                     device_config['google_account'] = None
                 
                 try:
+                    # Coba gunakan DeviceController dengan Chrome
                     from device_controller import DeviceController
                     self.devices[device_id] = DeviceController(device_id, device_config, self.profile_manager)
-                    logger.info("Device %s initialized", device_id)
+                    logger.info("Device %s initialized with Chrome", device_id)
                 except Exception as e:
-                    logger.error("Failed to initialize device %s: %s", device_id, e)
-                    return False
+                    logger.error("Failed to initialize device %s with Chrome: %s", device_id, e)
+                    
+                    # Fallback ke SimpleBrowser
+                    try:
+                        from simple_browser import SimpleBrowser
+                        self.devices[device_id] = SimpleBrowser(device_id)
+                        logger.info("Device %s initialized with SimpleBrowser fallback", device_id)
+                    except Exception as fallback_e:
+                        logger.error("Failed to initialize device %s with fallback: %s", device_id, fallback_e)
+                        return False
             
             self.stats['total_devices'] = len(self.devices)
             logger.info("Total devices initialized: %d", len(self.devices))
