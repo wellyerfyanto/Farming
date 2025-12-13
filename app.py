@@ -268,6 +268,37 @@ def debug_info():
     }
     return jsonify(info)
 
+@app.route('/api/chrome/debug')
+def chrome_debug():
+    """Debug endpoint untuk Chrome"""
+    try:
+        from chrome_setup import get_browser_info
+        info = get_browser_info()
+        
+        # Coba buka halaman sederhana
+        test_result = "N/A"
+        try:
+            from selenium import webdriver
+            from selenium.webdriver.chrome.options import Options
+            options = Options()
+            options.add_argument('--headless')
+            options.add_argument('--no-sandbox')
+            driver = webdriver.Chrome(options=options)
+            driver.get("https://www.google.com")
+            test_result = f"Success - Title: {driver.title}"
+            driver.quit()
+        except Exception as e:
+            test_result = f"Failed: {str(e)}"
+        
+        return jsonify({
+            'browser_info': info,
+            'test_result': test_result,
+            'environment': os.environ.get('RAILWAY_ENVIRONMENT'),
+            'port': os.environ.get('PORT')
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
 @app.route('/api/chrome/check')
 def check_chrome():
     """Check Chrome availability"""
