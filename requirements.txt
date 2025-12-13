@@ -1,6 +1,0 @@
-flask==2.3.3
-flask-cors==4.0.0
-selenium==4.15.0
-fake-useragent==1.4.0
-waitress==2.1.2
-requests==2.31.0
